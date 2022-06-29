@@ -55,6 +55,7 @@ class HomeViewController: UIViewController {
     func getPokemons(isForNextPage: Bool) {
         // Fetch data using webservice
         viewModel.getPokemons(isForNextPage: isForNextPage) { [weak self] error in
+            self?.pokemonTableView.tableFooterView?.isHidden = true
             if let error = error {
                 // Present alert controller
                 let alert = UIAlertController(title: self?.viewModel.alertTitle, message: error, preferredStyle: .alert)
@@ -75,7 +76,10 @@ class HomeViewController: UIViewController {
     
     @objc func textFieldDidChange(_ textField: UITextField) {
         if let searchText = textField.text {
-            
+            viewModel.searchPokemon(byName: searchText) {
+                
+            }
+            print("Searched :", searchText)
         }
     }
 }
@@ -84,22 +88,24 @@ class HomeViewController: UIViewController {
 
 extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        // Add load more activity indicator to display progress
-        let lastSectionIndex = tableView.numberOfSections - 1
-        let lastRowIndex = tableView.numberOfRows(inSection: lastSectionIndex) - 1
-        if indexPath.section ==  lastSectionIndex && indexPath.row == lastRowIndex {
-            let spinner = UIActivityIndicatorView(style: .medium)
-            spinner.startAnimating()
-            spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: CGFloat(44))
+        if let searchText = self.searchField.text, searchText.count <= 0 {
+            // Add load more activity indicator to display progress
+            let lastSectionIndex = tableView.numberOfSections - 1
+            let lastRowIndex = tableView.numberOfRows(inSection: lastSectionIndex) - 1
+            if indexPath.section ==  lastSectionIndex && indexPath.row == lastRowIndex {
+                let spinner = UIActivityIndicatorView(style: .medium)
+                spinner.startAnimating()
+                spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: CGFloat(44))
+                
+                tableView.tableFooterView = spinner
+                tableView.tableFooterView?.isHidden = false
+            }
             
-            tableView.tableFooterView = spinner
-            tableView.tableFooterView?.isHidden = false
-        }
-        
-        // Fetch next page data from backend
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-            if indexPath.row + 1 == self.viewModel.pokemonCellViewModels.count {
-                self.getPokemons(isForNextPage: true)
+            // Fetch next page data from backend
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
+                if indexPath.row + 1 == self.viewModel.pokemonCellViewModels.count {
+                    self.getPokemons(isForNextPage: true)
+                }
             }
         }
     }
