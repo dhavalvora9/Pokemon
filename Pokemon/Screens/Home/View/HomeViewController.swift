@@ -84,19 +84,23 @@ class HomeViewController: UIViewController {
 
 extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if indexPath.row + 1 == viewModel.pokemonCellViewModels.count {
-            print("End ")
-            self.getPokemons(isForNextPage: true)
-//            viewModel.addAddtionalData()
-
-//            // Reload TableView closure
-//            viewModel.reloadTableView = { [weak self] in
-//                DispatchQueue.main.async {
-//                    self?.searchIndicator.stopAnimating()
-//                    self?.searchButton.isHidden = false
-//                    self?.booksTableView.reloadData()
-//                }
-//            }
+        // Add load more activity indicator to display progress
+        let lastSectionIndex = tableView.numberOfSections - 1
+        let lastRowIndex = tableView.numberOfRows(inSection: lastSectionIndex) - 1
+        if indexPath.section ==  lastSectionIndex && indexPath.row == lastRowIndex {
+            let spinner = UIActivityIndicatorView(style: .medium)
+            spinner.startAnimating()
+            spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: CGFloat(44))
+            
+            tableView.tableFooterView = spinner
+            tableView.tableFooterView?.isHidden = false
+        }
+        
+        // Fetch next page data from backend
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
+            if indexPath.row + 1 == self.viewModel.pokemonCellViewModels.count {
+                self.getPokemons(isForNextPage: true)
+            }
         }
     }
 }
