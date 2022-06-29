@@ -14,7 +14,7 @@ class PokemonViewModel: NSObject {
     
     var reloadTableView: (() -> Void)?
     
-    private var results = [Result]()
+    private var pokemon: Pokemon?
     
     var alertTitle = "Something went wrong please try again later."
     var actionTitle = "OK"
@@ -29,11 +29,17 @@ class PokemonViewModel: NSObject {
         self.pokemonService = pokemonService
     }
     
-    func getPokemons(for page: String?, completion: @escaping (_ error: String?) -> ()) {
-        pokemonService.getPokemons(forPage: page) { success, pokemon, error in
+    func getPokemons(isForNextPage: Bool, completion: @escaping (_ error: String?) -> ()) {
+        // Check if it's last page of API and don't request additional data
+        if isForNextPage && self.pokemon?.next == nil {
+            return
+        }
+        
+        // Get next page url 
+        let nextPage = isForNextPage ? self.pokemon?.next : nil
+        pokemonService.getPokemons(for: nextPage) { success, pokemon, error in
             if success, let pokemon = pokemon {
-                self.results = pokemon.results
-                self.cellViewModel = [PokemonCellViewModel]()
+                self.pokemon = pokemon
                 
                 for result in pokemon.results {
                     self.cellViewModel.append(self.createCellModel(result: result))

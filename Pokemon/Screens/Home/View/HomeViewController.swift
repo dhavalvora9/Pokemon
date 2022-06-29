@@ -24,7 +24,7 @@ class HomeViewController: UIViewController {
         
         setupUI()
         initView()
-        getPokemonsData()
+        getPokemons(isForNextPage: false)
     }
     
     // MARK: - Initialization
@@ -52,9 +52,9 @@ class HomeViewController: UIViewController {
 
     // MARK: API Calling
     
-    func getPokemonsData() {
+    func getPokemons(isForNextPage: Bool) {
         // Fetch data using webservice
-        viewModel.getPokemons(for: nil) { [weak self] error in
+        viewModel.getPokemons(isForNextPage: isForNextPage) { [weak self] error in
             if let error = error {
                 // Present alert controller
                 let alert = UIAlertController(title: self?.viewModel.alertTitle, message: error, preferredStyle: .alert)
@@ -86,6 +86,7 @@ extension HomeViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row + 1 == viewModel.pokemonCellViewModels.count {
             print("End ")
+            self.getPokemons(isForNextPage: true)
 //            viewModel.addAddtionalData()
 
 //            // Reload TableView closure

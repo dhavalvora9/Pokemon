@@ -9,14 +9,18 @@ import Foundation
 import Alamofire
 
 protocol PokemonServiceProtocol {
-    func getPokemons(forPage: String?, completion: @escaping (_ success: Bool, _ results: Pokemon?, _ error: String?) -> ())
+    func getPokemons(for page: String?, completion: @escaping (_ success: Bool, _ results: Pokemon?, _ error: String?) -> ())
 }
 
 class PokemonService: PokemonServiceProtocol {
-    func getPokemons(forPage: String?, completion: @escaping (Bool, Pokemon?, String?) -> ()) {
-        let requestURL = Constant.pokemonAPI
-        let encodedURL = requestURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? requestURL
+    func getPokemons(for page: String?, completion: @escaping (Bool, Pokemon?, String?) -> ()) {
+        var requestURL = Constant.pokemonAPI
+        if let page = page {
+            requestURL = page
+        }
         
+        let encodedURL = requestURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? requestURL
+        print(requestURL)
         if let reachabilityManager = NetworkReachabilityManager(),
            reachabilityManager.isReachable {
             AF.request(encodedURL, method: .get).responseData { response in
