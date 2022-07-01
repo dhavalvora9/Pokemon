@@ -34,7 +34,6 @@ class HomeViewController: UIViewController {
         pokemonTableView.dataSource = self
         pokemonTableView.delegate = self
         pokemonTableView.tableFooterView = UIView()
-        pokemonTableView.allowsSelection = false
         pokemonTableView.keyboardDismissMode = .onDrag
         
         // Register cell
@@ -76,10 +75,7 @@ class HomeViewController: UIViewController {
     
     @objc func textFieldDidChange(_ textField: UITextField) {
         if let searchText = textField.text {
-            viewModel.searchPokemon(byName: searchText) {
-                
-            }
-            print("Searched :", searchText)
+            viewModel.searchPokemon(byName: searchText)
         }
     }
 }
@@ -102,12 +98,17 @@ extension HomeViewController: UITableViewDelegate {
             }
             
             // Fetch next page data from backend
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-                if indexPath.row + 1 == self.viewModel.pokemonCellViewModels.count {
-                    self.getPokemons(isForNextPage: true)
-                }
+            if indexPath.row + 1 == self.viewModel.pokemonCellViewModels.count {
+                self.getPokemons(isForNextPage: true)
             }
         }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        let pokemonDetailVC = self.storyboard?.instantiateViewController(withIdentifier: "PokemonDetailViewController") as! PokemonDetailViewController
+        pokemonDetailVC.pokemonCellModel = self.viewModel.getCellViewModel(at: indexPath)
+        self.navigationController?.pushViewController(pokemonDetailVC, animated: true)
     }
 }
 

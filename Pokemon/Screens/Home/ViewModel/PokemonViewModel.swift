@@ -53,7 +53,7 @@ class PokemonViewModel: NSObject {
         }
     }
     
-    func searchPokemon(byName: String, completion: @escaping () -> ()) {
+    func searchPokemon(byName: String) {
         let filteredData = self.cellViewModel.filter { $0.name.lowercased().contains(byName.lowercased()) }
         if filteredData.isEmpty && byName.count <= 0 {
             self.pokemonCellViewModels = self.cellViewModel
